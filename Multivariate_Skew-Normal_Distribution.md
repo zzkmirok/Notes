@@ -19,8 +19,7 @@
   
   Suppose that
 
-    $$
-    \left(
+    $$\left(
         \begin{aligned}
             X_0 \\
             X
@@ -31,60 +30,52 @@
             1 \quad \delta^T \\
             \delta \quad \Omega
         \end{aligned}
-    \right) 
-    $$
+    \right)$$
+
     Where $X_0$ is a *scalar component* and $\Omega^*$ is a correlation matrix. Then
 
-    $$
-    Z = \{
+    $$Z = \{
         \begin{aligned}
             X  &\quad if X_0 > 0\\
             -X &\quad otherwise
-        \end{aligned}  
-    $$
+        \end{aligned}$$
 
     is $SN_{k}(\Omega, \alpha)$ where
 
-    $$
-        \alpha = \frac{1}{(1-\delta^T\Omega^{-1}\delta)^{1/2}}\Omega^{-1}\delta
-    $$
+    $$\alpha = \frac{1}{(1-\delta^T\Omega^{-1}\delta)^{1/2}}\Omega^{-1}\delta$$
 
 ## Linear and Quadratic forms
 - Marginal Distributions: 
 
   The marginal distribution of a subset of the components of $Z$ is still a skew-normal variate.
-  - Proposition 2
+  - Proposition 2:
+   
 - Linear Transforms
   - Proposition 3:
     
-    $$
-        A^TZ \sim SN_k(A^T \Omega A, A^{-1} \alpha)
-    $$
+    $$A^TZ \sim SN_k(A^T \Omega A, A^{-1} \alpha)$$
 
    - Proposition 4
 
-        For a variable $Z \sim SN_k(\Omega, \alpha)$, there exists a linear transform $Z^*= A^*Z$ such that $Z^* \sim SN_k(I_k, \alpha^*)$ where *at most one* component of $\alpha^*$ is zero.  
+        For a variable $Z \sim SN_k(\Omega, \alpha)$ , there exists a linear transform $Z^*= A^{*}Z$ such that $Z^* \sim SN_k(I_k, \alpha^*)$ where *at most one* component of $\alpha^*$ is zero.  
 
         This plays a similar role as the one which converts a multivariate normal variable into a spherical form.
 
         There is also an inverted process. It is possible to span the whole class $SN_k(\Omega, \alpha)$ starting from $Z^{*}$ and applying suitable linear transformations. The density of $Z^{*}$ is of the form
 
-        $$
-            2 \prod_{i=1}^{k} \phi(u_i)\Phi(\alpha_m^*u_m)
-        $$
+        $$2 \prod_{i=1}^{k} \phi(u_i)\Phi(\alpha_m^*u_m)$$
+
         where
 
-        $$
-            \alpha^*_m = (\alpha^T \Omega \alpha)^{1/2}
-        $$
+        $$\alpha^*_m = (\alpha^T \Omega \alpha)^{1/2}$$
+
         is the only non-zero component of $\alpha^{*}$
 
     - Proposition 5 (along with Proposition 6 examine the issue of independence)
         
         Let $Z \sim SN_{k}(\Omega, \alpha)$ and $A$ is as in Proposition 3, and the linear transform
 
-        $$
-            Y = A^TZ = 
+        $$Y = A^TZ = 
             \left(
             \begin{aligned}
                 Y_1 \\
@@ -98,18 +89,15 @@
                 \vdots \\
                 A_h^T
             \end{aligned}
-            \right)Z      
-        $$
+            \right)Z$$
+
         where the matrices $A_1, \dots , A_h$ have $m_1, \dots, m_h$ columns, respectively. Then
 
-        $$
-            Y_i \sim SN_{m_i}(\Omega_{Y_i}, \alpha_{Y_i})
-        $$
+        $$Y_i \sim SN_{m_i}(\Omega_{Y_i}, \alpha_{Y_i})$$
+
         where
 
-        $$
-            \Omega_{Y_i}=A_i^T \Omega A_i, \qquad \alpha_{Y_i} = \frac{(A_i^T \Omega A_i)^{-1}A_i^T \Omega \alpha}{(1+\alpha^T (\Omega-\Omega A_i(A_i^T \Omega A_i)^{-1}A_i^{T} \Omega)\alpha)^{1/2}}
-        $$
+        $$\Omega_{Y_i}=A_i^T \Omega A_i, \qquad \alpha_{Y_i} = \frac{(A_i^T \Omega A_i)^{-1}A_i^T \Omega \alpha}{(1+\alpha^T (\Omega-\Omega A_i(A_i^T \Omega A_i)^{-1}A_i^{T} \Omega)\alpha)^{1/2}}$$
 
         Since $\Phi(u+v) \neq \Phi(u)\Phi(v)$, it follows that **at most one** of the $Y_i$ above can be a 'proper' skew-normal variate, while others are all regular normal variates, if mutual independence holds.
 
@@ -122,19 +110,16 @@
         Remark:
 
         - if (a) holds and from Proposition 3, we can have a joint distribution of $Y$ is $SN_k(\Omega_Y,\alpha_Y)$ where,
-        $$
-            \Omega_Y = diag(A_1^T \Omega A_1,\dots,A_h^T \Omega A_h),
-        $$ 
-        $$
-            \alpha_Y = (A^T \Omega A)^{-1} A^T \Omega \alpha 
+        $$\Omega_Y = diag(A_1^T \Omega A_1,\dots,A_h^T \Omega A_h),$$ 
+        
+        $$\alpha_Y = (A^T \Omega A)^{-1} A^T \Omega \alpha 
             = \left(
             \begin{aligned}
                  (A_1^T \Omega A_1)^{-1}&A_1^T \Omega \alpha\\
                 &\vdots\\
                  (A_h^T \Omega A_h)^{-1}&A_h^T \Omega \alpha
             \end{aligned}
-            \right)
-        $$
+            \right)$$
 
 - Quadratic forms
 
