@@ -57,11 +57,11 @@
 
    - Proposition 4
 
-        For a variable $Z \sim SN_k(\Omega, \alpha)$ , there exists a linear transform $Z^*= A^{*}Z$ such that $Z^* \sim SN_k(I_k, \alpha^*)$ where *at most one* component of $\alpha^*$ is zero.  
+        For a variable $Z \sim SN_k(\Omega, \alpha)$ , there exists a linear transform $Z^*= A^{*}Z$, such that $Z^* \sim SN_k(I_k, \alpha^*)$, where *at most one* component of $\alpha^{*}$ is zero.  
 
         This plays a similar role as the one which converts a multivariate normal variable into a spherical form.
 
-        There is also an inverted process. It is possible to span the whole class $SN_k(\Omega, \alpha)$ starting from $Z^{*}$ and applying suitable linear transformations. The density of $Z^{*}$ is of the form
+        There is also an inverted process. It is possible to span the whole class $SN_k(\Omega, \alpha)$ starting from $Z^{*}$, and applying suitable linear transformations. The density of $Z^{*}$ is of the form
 
         $$2 \prod_{i=1}^{k} \phi(u_i)\Phi(\alpha_m^*u_m)$$
 
@@ -75,7 +75,8 @@
         
         Let $Z \sim SN_{k}(\Omega, \alpha)$ and $A$ is as in Proposition 3, and the linear transform
 
-        $$Y = A^TZ = 
+        $$\begin{equation}
+            Y = A^TZ = 
             \left(
             \begin{aligned}
                 Y_1 \\
@@ -89,7 +90,8 @@
                 \vdots \\
                 A_h^T
             \end{aligned}
-            \right)Z$$
+            \right)Z
+            \end{equation}$$
 
         where the matrices $A_1, \dots , A_h$ have $m_1, \dots, m_h$ columns, respectively. Then
 
