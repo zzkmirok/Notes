@@ -75,8 +75,7 @@
         
         Let $Z \sim SN_{k}(\Omega, \alpha)$ and $A$ is as in Proposition 3, and the linear transform
 
-        $$\begin{equation}
-            Y = A^TZ = 
+        $$Y = A^TZ = 
             \left(
             \begin{aligned}
                 Y_1 \\
@@ -90,8 +89,7 @@
                 \vdots \\
                 A_h^T
             \end{aligned}
-            \right)Z
-            \end{equation}$$
+            \right)Z$$
 
         where the matrices $A_1, \dots , A_h$ have $m_1, \dots, m_h$ columns, respectively. Then
 
@@ -123,5 +121,48 @@
             \end{aligned}
             \right)$$
 
-- Quadratic forms
+- Quadratic forms:
+  - Square of 1D SN random variate $\sim \chi_1^2$. This property carries on in the multivariate case since $Z^T \Omega^{-1} Z \sim \chi_k^2$.
+  - Proposition 7:
+    
+    If $Z \sim SN_k(\Omega, \alpha)$, and $B$ is a symmetric positive semi-definite $k \times k$ matrix of rank $p$ such that $B \Omega B=B$, then $Z^T B Z \sim \chi_p^2$
+  - Corollary 8
+  - Proposition 9: Mutually independent feature.
+  - Proposition 10 (Fisher-Cochran):
+    
+    If $Z \sim SN_k(I_k, \alpha)$ and $B_1, \dots, B_h$ are symmetric $k \times k$ matrices of rank $p_1,\dots, p_h$, respectively, such that $\sum B_i = I_k$ and $B_i \alpha \neq 0$ for *at most one* choices of $i$, then the quadratic forms $Z^T B_i Z$ are independent $\chi_{p_i}^2$ iff $\sum p_i = k$
 
+## Culmulants and indices
+- Index of skewness takes the form. **(Don't know where this $k$ comes from)**
+    
+    $$\gamma_{1,k}=(\frac{4 - \pi}{2})^2(\mu_z^T \Sigma^{-1} \mu_z)^3$$
+
+    where $\Sigma = \Omega - \mu_z \mu_z^T$
+
+- One can rewrite
+    
+    $$\mu_z^T \Sigma^{-1} \mu_z = \frac{\mu_z^T \Omega^{-1} \mu_z}{1 - \mu_z^T \Omega^{-1} \mu_z}$$
+
+    Which allows easier examination of the range of $\mu_z^T \Sigma^{-1} \mu_z$, by considering the range of $\delta^T \Omega^{-1} \delta$, based on the relation btw $\mu_z$ and $\delta$ showed above. 
+    
+    $$\delta^T \Omega^{-1} \delta = \frac{\alpha^T \Omega \alpha}{1 + \alpha^T \Omega \alpha} = \frac{a}{1+a}$$  
+    
+    where $a$ is the square of  $\alpha_m^*$, defined above in **propositon 4**. Since $a$ spans $[0, \infty)$, then
+    
+    $$\mu_z^T \Sigma^{-1} \mu_z = \frac{2a}{\pi + (\pi - 2)a} \in [0,2/(\pi-2))$$
+
+## Location and Scale Parameters
+- We write
+  
+  $$ Y = \xi + \omega Z$$
+  where
+  $$ \xi = (\xi_1,\dots,\xi_k)^T, \quad \omega = diag(\omega_1,\dots,\omega_k)$$
+  are location and scale parameters respectively.
+  
+  Density function of $Y$ is 
+  
+  $$ 2 \phi_k(y-\xi;\Omega)\Phi(\alpha^T\omega^{-1}(y-\xi))$$ 
+
+  where 
+  $$ \Omega = \omega \Omega_z \omega$$
+  is a covariance matrix, and
