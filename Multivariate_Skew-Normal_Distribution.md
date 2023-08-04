@@ -165,4 +165,9 @@
 
   where 
   $$ \Omega = \omega \Omega_z \omega$$
-  is a covariance matrix, and
+  is a covariance matrix **(This part not finished)**
+
+## Statistical Issues in the scalar case (Mainly Maximal Likelihood Estimation)
+
+- Direct parameters
+  - Sigularity problem of the information matrix at $\alpha=0$
