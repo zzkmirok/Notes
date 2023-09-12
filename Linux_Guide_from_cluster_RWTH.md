@@ -7,3 +7,7 @@
 [Shell script](Linux_Guide_from_cluster_RWTH/Shell%20script.md)
 
 [SSH使用](Linux_Guide_from_cluster_RWTH/SSH使用.md)
+
+[gnuplot](Linux_Guide_from_cluster_RWTH/gnuplot.md)
+
+**Tutorial access** [Linux tutorial for HPC](https://hpc-wiki.info/hpc/Introduction_to_Linux_in_HPC)
