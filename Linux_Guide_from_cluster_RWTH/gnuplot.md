@@ -107,3 +107,6 @@ The Gnuplot command `stat 'ch3f-1.ener' u 7` is used to obtain statistics for a 
 - `u 7`: This part specifies that you want to compute statistics on column 7 of the data file. The 'u' stands for "using."
 
 When you run this Gnuplot command, it will calculate various statistics for the data in column 7 of the file 'ch3f-1.ener,' such as the minimum, maximum, mean, standard deviation, and more, and it will display these statistics in the Gnuplot terminal. These statistics can be helpful for understanding the distribution and characteristics of the data in the specified column.
+
+
+### ` set xrange[-2:2]; set yrange[-0.5:2]` ###

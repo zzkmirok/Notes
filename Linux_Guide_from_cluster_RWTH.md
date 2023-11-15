@@ -10,4 +10,6 @@
 
 [gnuplot](Linux_Guide_from_cluster_RWTH/gnuplot.md)
 
+[md tricks](Linux_Guide_from_cluster_RWTH/md_tricks.md)
+
 **Tutorial access** [Linux tutorial for HPC](https://hpc-wiki.info/hpc/Introduction_to_Linux_in_HPC)
