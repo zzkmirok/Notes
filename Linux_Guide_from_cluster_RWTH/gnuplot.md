@@ -110,3 +110,18 @@ When you run this Gnuplot command, it will calculate various statistics for the 
 
 
 ### ` set xrange[-2:2]; set yrange[-0.5:2]` ###
+
+### `do for [i=1:30] { plot 'COLVAR_'.i using 1:2; pause 0.5 }` ###
+To achieve this in gnuplot, you can use a one-liner command that loops through your files and plots them as a live animation. Here's the command:
+
+```bash
+gnuplot -e "do for [i=1:30] { plot 'COLVAR_'.i using 1:2; pause 0.5 }"
+```
+
+This command does the following:
+- Launches gnuplot.
+- Uses a `do for` loop to iterate over the files from `COLVAR_1` to `COLVAR_30`.
+- For each file `i`, it plots the data using the first and second columns (you can adjust the `using 1:2` part if your data is structured differently).
+- Pauses for 0.5 seconds (`pause 0.5`) after each plot to create an animation effect. You can adjust this duration to speed up or slow down the animation.
+
+Ensure that your `COLVAR_i` files are in the correct format for gnuplot and that they are accessible from the directory where you run this command.
