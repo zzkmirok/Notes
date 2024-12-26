@@ -166,4 +166,89 @@ make
 make install
 ```
 
-## TODO: Patch lammps with plumed
+## Patch lammps with plumed
+
+We link our already installed plumed to lammps with lammps plugin package (should be installed in the previous step)
+
+There is an example `CMakeLists.txt` script for plumed plugin in the `example/PACKAGE/plumed/plugin` for such installation. However, it directly includes the CMake files regarding two packages: plugin and plumed in the `CMake/Module` folder, i.e. if following that script, one will need to download the certain version of plumed and reinstall everything under the lammps folder.
+
+To avoid this, I modified the `CMakeLists.txt` in the `plumed/plugin` by commenting out the original `include(PLUMED)`.
+```CMake
+...
+include(LAMMPSInterfacePlugin)
+# include(PLUMED)
+
+##########################
+# building the plugins
+
+if(BUILD_MPI)
+  set(PLUMED_CONFIG_MPI "--enable-mpi")
+  set(PLUMED_CONFIG_CC  ${CMAKE_MPI_C_COMPILER})
+  set(PLUMED_CONFIG_CXX  ${CMAKE_MPI_CXX_COMPILER})
+  set(PLUMED_CONFIG_CPP "-I ${MPI_CXX_INCLUDE_PATH}")
+  set(PLUMED_CONFIG_LIB "${MPI_CXX_LIBRARIES}")
+  set(PLUMED_CONFIG_DEP "mpi4win_build")
+else()
+  set(PLUMED_CONFIG_MPI "--disable-mpi")
+  set(PLUMED_CONFIG_CC  ${CMAKE_C_COMPILER})
+  set(PLUMED_CONFIG_CXX  ${CMAKE_CXX_COMPILER})
+  set(PLUMED_CONFIG_CPP "")
+  set(PLUMED_CONFIG_LIB "")
+  set(PLUMED_CONFIG_DEP "")
+endif()
+if(BUILD_OMP)
+  set(PLUMED_CONFIG_OMP "--enable-openmp")
+else()
+  set(PLUMED_CONFIG_OMP "--disable-openmp")
+endif()
+
+
+add_library(LAMMPS::PLUMED INTERFACE IMPORTED)
+if(PLUMED_MODE STREQUAL "RUNTIME")
+  # PLUMED_KERNEL should already in the system env variables
+  set_target_properties(LAMMPS::PLUMED PROPERTIES INTERFACE_COMPILE_DEFINITIONS "__PLUMED_DEFAULT_KERNEL=$ENV{PLUMED_KERNEL}")
+  # For debug
+  # get_target_property(compile_defs LAMMPS::PLUMED INTERFACE_COMPILE_DEFINITIONS)
+  # message(STATUS "LAMMPS::PLUMED INTERFACE_COMPILE_DEFINITIONS: ${compile_defs}")
+  include($ENV{PLUMED_ROOT}/src/lib/Plumed.cmake.runtime)
+endif()
+set_target_properties(LAMMPS::PLUMED PROPERTIES INTERFACE_LINK_LIBRARIES "${PLUMED_LOAD}")
+set_target_properties(LAMMPS::PLUMED PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PLUMED_INCLUDE_DIRS}")
+
+add_library(plumedplugin MODULE plumedplugin.cpp ${LAMMPS_SOURCE_DIR}/PLUMED/fix_plumed.cpp)
+target_link_libraries(plumedplugin PRIVATE LAMMPS::PLUMED)
+target_link_libraries(plumedplugin PRIVATE lammps)
+target_include_directories(plumedplugin PRIVATE ${LAMMPS_SOURCE_DIR}/PLUMED)
+set_target_properties(plumedplugin PROPERTIES PREFIX "" SUFFIX ".so")
+
+...
+```
+
+In this script, we explicitly require the `PLUMED_MODE` is `RUNTIME`, following the original script.
+
+After this step, since we only want to build a `plumedplugin.so`, meaning our main CMakeLists is the one in the original `plumed/plugin`, so we copy it to some other folder and also make a symbolic link for `LAMMPSInterfacePlugin.cmake` in the original `lammps/cmake/Module/` folder.
+```shell
+ ln -s /home/yy508225/lammps/cmake/Modules/LAMMPSInterfacePlugin.cmake ./LAMMPSInterfacePlugin.cmake
+```
+
+Then we need first retrieve all our env related to lammps and plumed via e.g. activate a python venv:
+```
+source <venv_folder>/bin/activate
+```
+
+In the new folder containing the `CMakeLists.txt`
+```shell
+mkdir build
+cd build
+# LAMMPS_SOURCE_DIR: because we are not in the default lammps folder
+# PLUMED_MODE: for consistancy from the original plumed.cmake file
+# PLUMED_INCLUDE_DIRS: for compling the fix_plumed.cpp and it is the installed dir lib of my custom plumed
+cmake -DLAMMPS_SOURCE_DIR="/home/yy508225/lammps/src" -DPLUMED_MODE="RUNTIME" -DPLUMED_INCLUDE_DIRS="/home/yy508225/myplumed/plumed2.9.0/include" ..  
+make
+mv plumedplugin.so ..
+cd ..
+# LAMMPS_PLUGIN_PATH: the default system env variable for searching lammps plugin
+# add this line to the corresponding python venv activate file 
+# (with absolute path not pwd) 
+export LAMMPS_PLUGIN_PATH=$(pwd)
+```
