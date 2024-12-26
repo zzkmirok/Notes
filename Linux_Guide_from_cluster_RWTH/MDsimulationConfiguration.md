@@ -126,3 +126,29 @@ The version of gromacs I used is `gromacs-2023`
 
 **TODO**
 how to install cp2k patched with plumed
+
+## Install CP2K
+
+1. cd /tools/toolchain
+
+
+2. ./install_cp2k_toolchain.sh
+    If want to connect to plumed, set `--with-plumed=system` with all ENV variables set correctly
+   
+```
+ ./install_cp2k_toolchain.sh --with-cmake=system --with-libxc=system --with-libint=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/Libint/2.7.2-GCC-12.2.0-lmax-6-cp2k --with-fftw=system --with-openblas=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/OpenBLAS/0.3.21-GCC-12.2.0 --with-scalapack=system --with-libxsmm=system --with-plumed=system --with-gsl=system --with-libtorch=system --with-libvori=system --with-openmpi=system --math-mode=openblas --with-intel=no --with-mpich=no --with-acml=no --with-mkl=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/imkl/2022.1.0/mkl/2022.1.0 --with-intelmpi=no --mpi-mode=openmpi
+```
+
+
+3. copying the create arch files like 'local.ssmp' to arch folder in cp2k path
+
+
+4. source the setup file in the 'toolchain' folder
+```
+source /home/yy508225/mycp2k/cp2k-2023.1/tools/toolchain/install/setup
+```
+
+5. make 
+```
+make -j 30 ARCH=local VERSION=ssmp
+```
