@@ -152,3 +152,17 @@ source /home/yy508225/mycp2k/cp2k-2023.1/tools/toolchain/install/setup
 ```
 make -j 30 ARCH=local VERSION=ssmp
 ```
+
+## Install Lammps
+We can follow the settings in the `cmake/presets` folder. Not to build shared library.
+
+`-D` means define certain variable in cmake
+```
+# in lammps folder
+mkdir -p build
+cmake -C ../cmake/presets/custom.cmake -C ../cmake/presets/gcc.cmake -DCMAKE_INSTALL_PREFIX="/home/yy508225/mylammpsAll" ../cmake
+make
+make install
+```
+
+## TODO: Patch lammps with plumed
