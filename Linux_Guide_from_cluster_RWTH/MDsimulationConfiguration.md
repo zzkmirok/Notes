@@ -6,6 +6,7 @@ This is much more straight forward. To avoid line number, if we want to grep the
 ```
     # Delete the first 7 characters of each line of output of the history.
     history | grep "pip install" | cut -c 8-
+    history <start_linenumber> <end_linenumber> | ...
 ```
 Cause we are using zsh on the cluster, we can also use the following to invoke the history:
 ### `fc -l`
