@@ -64,8 +64,9 @@ The above must be the commands I used for install `mlcolvar` and `plumed` python
 -   `pip install .` install the local package to the selected `$PYTHON_PATH`
   
 
-## Configuration of PLUMED
-1. Load the proper modules.
+## Configuration of PLUMED 
+1. Load the proper modules 
+(Deprecated for OS Rocky8)
 ```bash
 module load GCC/12.2.0
 module load OpenMPI/4.1.4
@@ -73,12 +74,38 @@ module load PLUMED/2.9.0
 module unload PLUMED/2.9.0
 # Migt also try module load foss/2022b
 ``` 
+
+**For OS RH9**
+```bash
+ ml load foss/2024a
+ ml load GSL/2.8
+ ml load ncurses/6.5
+ ml load bzip2/1.0.8
+ ml load libreadline/8.2
+ ml load Tcl/8.6.14
+ ml load SQLite/3.45.3
+ ml load GMP/6.3.0
+ ml load libffi/3.4.5
+ ml load Python/3.12.3
+ ml load pybind11/2.12.0
+ ml load SciPy-bundle/2024.05
+ ml load gzip/1.13
+ ml load lz4/1.9.4
+ ml load zstd/1.5.6
+ ml load ICU/75.1
+ ml load Boost/1.85.0
+ ml load Cython/3.0.10
+ ml load CUDA/12.8.0
+ ```
+
 2. set up Python path (since I was using pytorch)
     **TODO**
     Also add here how to configure `$PYTHONPATHON` to activate my own python module
    ```bash
     LIBTORCH="/rwthfs/rz/cluster/home/yy508225/myC_lib/Libtorch/libtorch"
-    export CPATH=${LIBTORCH}/include/torch/csrc/api/include/:${LIBTORCH}/include/:${LIBTORCH}/include/torch:$CPATH         export INCLUDE=${LIBTORCH}/include/torch/csrc/api/include/:${LIBTORCH}/include/:${LIBTORCH}/include/torch:$INCLUDE     export LIBRARY_PATH=${LIBTORCH}/lib:$LIBRARY_PATH
+    export CPATH=${LIBTORCH}/include/torch/csrc/api/include/:${LIBTORCH}/include/:${LIBTORCH}/include/torch:$CPATH         
+    export INCLUDE=${LIBTORCH}/include/torch/csrc/api/include/:${LIBTORCH}/include/:${LIBTORCH}/include/torch:$INCLUDE     
+    export LIBRARY_PATH=${LIBTORCH}/lib:$LIBRARY_PATH
     export LD_LIBRARY_PATH=${LIBTORCH}/lib:$LD_LIBRARY_PATH
    ```
     **Note**:
@@ -89,18 +116,33 @@ module unload PLUMED/2.9.0
     ```bash
     ./configure --prefix=/home/yy508225/myplumed/plumed2.9.0 --enable-libtorch --enable-modules=pytorch+ves+opes CXX="$MPICXX" CPPFLAGS=-DMPICH_IGNORE_CXX_SEEK
     ```
-    This is not enough. I finally activated mpi by adding one more variable `-D__PLUMED_MPI=1` to the `Makefile.conf` at the line starting with `CPPFLAGS`
+    This is not sufficient. I finally activated mpi by adding one more variable `-D__PLUMED_MPI=1` to the `Makefile.conf` at the line starting with `CPPFLAGS`
     ```bash
-     CPPFLAGS=-DMPICH_IGNORE_CXX_SEEK -DPACKAGE_NAME=\"PLUMED\" -DPACKAGE_TARNAME=\"plumed\" -DPACKAGE_VERSION=\"2\" -      DPACKAGE_STRING=\"PLUMED\ 2\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -D__PLUMED_LIBCXX11=1 -DSTDC_HEADERS=1 -     DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -     DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -D__PLUMED_HAS_EXTERNAL_BLAS=1 -                                D__PLUMED_HAS_EXTERNAL_LAPACK=1 -D__PLUMED_HAS_MOLFILE_PLUGINS=1 -D__PLUMED_HAS_MPI=1 -D__PLUMED_HAS_ASMJIT=1 -        D__PLUMED_HAS_CREGEX=1 -D__PLUMED_HAS_DLOPEN=1 -D__PLUMED_HAS_RTLD_DEFAULT=1 -D__PLUMED_HAS_CHDIR=1 -                  D__PLUMED_HAS_SUBPROCESS=1 -D__PLUMED_HAS_GETCWD=1 -D__PLUMED_HAS_POPEN=1 -D__PLUMED_HAS_EXECINFO=1 -                  D__PLUMED_HAS_ZLIB=1 -D__PLUMED_HAS_GSL=1 -D__PLUMED_HAS_FFTW=1 -D__PLUMED_HAS_PYTHON=1 -                              D__PLUMED_HAS_LIBTORCH=1 -DNDEBUG=1 -D_REENTRANT=1 -D__PLUMED_MPI=1
+     CPPFLAGS=-DMPICH_IGNORE_CXX_SEEK -DPACKAGE_NAME=\"PLUMED\" -DPACKAGE_TARNAME=\"plumed\" -DPACKAGE_VERSION=\"2\" -      DPACKAGE_STRING=\"PLUMED\ 2\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -D__PLUMED_LIBCXX11=1 -DSTDC_HEADERS=1 -     DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -     DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -D__PLUMED_HAS_EXTERNAL_BLAS=1 -                                D__PLUMED_HAS_EXTERNAL_LAPACK=1 -D__PLUMED_HAS_MOLFILE_PLUGINS=1 -D__PLUMED_HAS_MPI=1 -D__PLUMED_HAS_ASMJIT=1 -        D__PLUMED_HAS_CREGEX=1 -D__PLUMED_HAS_DLOPEN=1 -D__PLUMED_HAS_RTLD_DEFAULT=1 -D__PLUMED_HAS_CHDIR=1 -                  D__PLUMED_HAS_SUBPROCESS=1 -D__PLUMED_HAS_GETCWD=1 -D__PLUMED_HAS_POPEN=1 -D__PLUMED_HAS_EXECINFO=1 -                  D__PLUMED_HAS_ZLIB=1 -D__PLUMED_HAS_GSL=1 -D__PLUMED_HAS_FFTW=1 -D__PLUMED_HAS_PYTHON=1 -                              D__PLUMED_HAS_LIBTORCH=1 -DNDEBUG=1 -D_REENTRANT=1 
+     <add the following by the end of the last line>
+     -D__PLUMED_MPI=1
     ```
 4. After make and install, the plumed runs with MPI as default, by checking whether MPI is available:
    ```bash
     plumed --has-mpi && echo ok
    ```
+  > Update in RH9:
+  > The above command will lead to a warning regarding missing `cuda`
    by running without MPI:
    ```bash
     plumed --no-mpi
    ```
+  
+5. Proper setup of PLUMED env
+
+```bash
+ MY_PLUMED_PATH="/rwthfs/rz/cluster/home/yy508225/myplumed/plumed2.9.0_RH9"
+ PATH="${MY_PLUMED_PATH}/bin:$PATH"
+ PLUMED_KERNEL="${MY_PLUMED_PATH}/lib/libplumedKernel.so"
+ PYTHONPATH="${MY_PLUMED_PATH}/lib/plumed/python:$PYTHONPATH"
+ PLUMED_ROOT="${MY_PLUMED_PATH}/lib/plumed/"
+ LD_LIBRARY_PATH="${MY_PLUMED_PATH}/lib/:$LD_LIBRARY_PATH
+```
 
 ## Patch Gromacs with Plumed
 The version of gromacs I used is `gromacs-2023`
@@ -130,28 +172,62 @@ how to install cp2k patched with plumed
 
 ## Install CP2K
 
+0. Additional modules for installation and simulation on new OS RH9:
+```bash
+ml load CMake/3.31.7
+ml load libxc/6.2.2
+ml load HDF5/1.14.5
+```
+
 1. cd /tools/toolchain
 
 
 2. ./install_cp2k_toolchain.sh
     If want to connect to plumed, set `--with-plumed=system` with all ENV variables set correctly
+
+
+  (Deprecated for OS Rocky8)
+  ```bash 
+  ./install_cp2k_toolchain.sh --with-cmake=system --with-libxc=system --with-libint=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/Libint/2.7.2-GCC-12.2.0-lmax-6-cp2k --with-fftw=system --with-openblas=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/OpenBLAS/0.3.21-GCC-12.2.0 --with-scalapack=system --with-libxsmm=system --with-plumed=system --with-gsl=system --with-libtorch=system --with-libvori=system --with-openmpi=system --math-mode=openblas --with-intel=no --with-mpich=no --with-acml=no --with-mkl=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/imkl/2022.1.0/mkl/2022.1.0 --with-intelmpi=no --mpi-mode=openmpi
+  ```
+
+  **For OS RH9**
+
+  ```bash 
+./install_cp2k_toolchain.sh --with-cmake=system --with-libxc=system --with-fftw=system --with-openblas=/cvmfs/software.hpc.rwth.de/Linux/RH9/x86_64/intel/sapphirerapids/software/OpenBLAS/0.3.27-GCC-13.3.0/ --with-scalapack=system --with-plumed=system --with-gsl=system --with-libtorch=system --with-openmpi=system --math-mode=openblas --with-intel=no --with-mpich=no --with-acml=no --with-mkl=no --with-intelmpi=no --mpi-mode=openmpi
+  
+  # Purely independent installation
+  ./install_cp2k_toolchain.sh --with-gcc=install --with-intel=no --with-openmpi=install --with-mpich=no --with-intelmpi=no --with-acml=no --with-mkl=no --with-plumed=install --with-libtorch=install
+  ```
+
+3. Follow the hints raised after successful configuration, copying the create arch files like 'local.ssmp' to arch folder in cp2k path, i.e. `~/mycp2k/cp2k-2025.1`
    
+```bash
+Now copy:
+  cp /home/yy508225/mycp2k/cp2k-2025.1/tools/toolchain/install/arch/* to the cp2k/arch/ directory
+To use the installed tools and libraries and cp2k version
+compiled with it you will first need to execute at the prompt:
+  source /home/yy508225/mycp2k/cp2k-2025.1/tools/toolchain/install/setup
+To build CP2K you should change directory:
+  cd cp2k/
+  make -j 96 ARCH=local VERSION="ssmp sdbg psmp pdbg"
 ```
- ./install_cp2k_toolchain.sh --with-cmake=system --with-libxc=system --with-libint=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/Libint/2.7.2-GCC-12.2.0-lmax-6-cp2k --with-fftw=system --with-openblas=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/OpenBLAS/0.3.21-GCC-12.2.0 --with-scalapack=system --with-libxsmm=system --with-plumed=system --with-gsl=system --with-libtorch=system --with-libvori=system --with-openmpi=system --math-mode=openblas --with-intel=no --with-mpich=no --with-acml=no --with-mkl=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/imkl/2022.1.0/mkl/2022.1.0 --with-intelmpi=no --mpi-mode=openmpi
-```
-
-
-3. copying the create arch files like 'local.ssmp' to arch folder in cp2k path
-
 
 4. source the setup file in the 'toolchain' folder
-```
+```bash
 source /home/yy508225/mycp2k/cp2k-2023.1/tools/toolchain/install/setup
 ```
 
 5. make 
+```bash
+# in ~/mycp2k/cp2k-2025.1
+make -j 96 ARCH=local VERSION=psmp
 ```
-make -j 30 ARCH=local VERSION=ssmp
+
+6. Setup `$PATH` for CP2K
+
+```bash
+PATH="/home/yy508225/mycp2k/cp2k-2025.1/exe/local:$PATH"
 ```
 
 ## Install Lammps
