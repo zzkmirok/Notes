@@ -1,40 +1,58 @@
 # MD simulation configuration history on cluster
+
 This file is for documentation of how I set up environments for some md simulation tools, patching with plumed.
+
 ## History Invoke on Cluster
-### `history | grep`
+
+### 1. `history | grep`
+
 This is much more straight forward. To avoid line number, if we want to grep the lines with e.g. "pip install":
-```
+
+```bash
     # Delete the first 7 characters of each line of output of the history.
     history | grep "pip install" | cut -c 8-
     history <start_linenumber> <end_linenumber> | ...
 ```
+
 Cause we are using zsh on the cluster, we can also use the following to invoke the history:
-### `fc -l`
+
+### 2. `fc -l`
+
 some useful commands:
 List the most recent entries:
+
 ```bash
 fc -l
 ```
+
 List them without command numbers:
+
 ```bash
 fc -ln
 ```
+
 List the most recent 20 commands without command numbers:
+
 ```bash
 fc -ln -20
 ```
+
 Include a timestamp and print only the most recent command:
+
 ```bash
 fc -lnd -1
 ```
+
 Show all the commands (within the last 50) that include the string "setop" (shows setopt and unsetopt):
+
 ```bash
 fc -l -m '*setopt*' -50
 ```
+
 Wildcard is applied for word matching.
 
-
 ## Installation of external package of python with source code
+
 ```bash
 python3 -m pip install matplotlib --target /home/yy508225/my_python_libs/py3_10_8
 python3 -m pip install KDEpy scikit-learn --target /home/yy508225/my_python_libs/py3_10_8
@@ -58,82 +76,250 @@ python3 -m pip install . --target /home/yy508225/my_python_libs/py3_10_8 --upgra
 ```
 The above must be the commands I used for install `mlcolvar` and `plumed` python package.
 
+```markdown
 **Note**:
 -   `--target ` for user specified `$PYTHON_PATH`
 -   `upgrade ` for updating and not installing redundantly.
 -   `pip install .` install the local package to the selected `$PYTHON_PATH`
-  
+```  
 
-## Configuration of PLUMED 
-1. Load the proper modules 
+## Configuration of Python Virtual VENV
+
+```shell
+# This file must be used with "source bin/activate" *from bash*
+# You cannot run it directly
+
+deactivate () {
+    # reset old environment variables
+    if [ -n "${_OLD_VIRTUAL_PATH:-}" ] ; then
+        PATH="${_OLD_VIRTUAL_PATH:-}"
+        export PATH
+        unset _OLD_VIRTUAL_PATH
+    fi
+    if [ -n "${_OLD_VIRTUAL_PYTHONHOME:-}" ] ; then
+        PYTHONHOME="${_OLD_VIRTUAL_PYTHONHOME:-}"
+        export PYTHONHOME
+        unset _OLD_VIRTUAL_PYTHONHOME
+    fi    
+    
+    if [ -n "${_OLD_LD_LIBRARY_PATH:-}" ] ; then
+        LD_LIBRARY_PATH="${_OLD_LD_LIBRARY_PATH:-}"
+        export LD_LIBRARY_PATH
+        unset _OLD_LD_LIBRARY_PATH
+    fi
+
+    if [ -n "${_OLD_LIBRARY_PATH:-}" ] ; then
+        LIBRARY_PATH="${_OLD_LIBRARY_PATH:-}"
+        export LIBRARY_PATH
+        unset _OLD_LIBRARY_PATH
+    fi
+
+    if [ -n "${_OLD_CPATH:-}" ] ; then
+        CPATH="${_OLD_CPATH:-}"
+        export CPATH
+        unset _OLD_CPATH
+    fi
+
+    # Call hash to forget past commands. Without forgetting
+    # past commands the $PATH changes we made may not be respected
+    hash -r 2> /dev/null
+
+    if [ -n "${_OLD_VIRTUAL_PS1:-}" ] ; then
+        PS1="${_OLD_VIRTUAL_PS1:-}"
+        export PS1
+        unset _OLD_VIRTUAL_PS1
+    fi
+    unset INCLUDE
+    
+    unset PYTHONPATH
+    unset PLUMED_KERNEL
+    unset PLUMED_ROOT
+    
+    unset VIRTUAL_ENV
+    unset VIRTUAL_ENV_PROMPT
+
+    module purge
+    module load NHRDEFAULT/2024a
+
+    if [ ! "${1:-}" = "nondestructive" ] ; then
+    # Self destruct!
+        unset -f deactivate
+    fi
+}
+
+# unset irrelevant variables
+deactivate nondestructive
+
+```
+
+```bash  
+# on Windows, a path can contain colons and backslashes and has to be converted:
+if [ "${OSTYPE:-}" = "cygwin" ] || [ "${OSTYPE:-}" = "msys" ] ; then
+    # transform D:\path\to\venv to /d/path/to/venv on MSYS
+    # and to /cygdrive/d/path/to/venv on Cygwin
+    export VIRTUAL_ENV=$(cygpath "/rwthfs/rz/cluster/home/yy508225/RH9PYENV/ONLY_PLUMED")
+else
+    # use the path as-is
+    export VIRTUAL_ENV="/rwthfs/rz/cluster/home/yy508225/RH9PYENV/ONLY_PLUMED"
+fi
+_OLD_VIRTUAL_PATH="$PATH"
+_OLD_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+_OLD_CPATH="$CPATH"
+_OLD_LIBRARY_PATH="$LIBRARY_PATH"
+
+
+
+_OLD_VIRTUAL_PATH="$PATH"
+module purge
+module load foss/2024a
+module load GSL/2.8
+module load Python/3.12.3
+ml load PLUMED/2.9.3
+ml unload PLUMED/2.9.3
+
+# LD_LIBRARY_PATH="/cvmfs/software.hpc.rwth.de/Linux/RH9/x86_64/intel/sapphirerapids/software/CUDA/12.8.0/targets/x86_64-linux/lib/stubs:$LD_LIBRARY_PATH"
+
+PATH="$VIRTUAL_ENV/bin:$PATH"
+
+echo "adding libtorch to cpath"
+_MY_LIBTORCH="/rwthfs/rz/cluster/home/yy508225/myC_lib/Libtorch/libtorch"
+CPATH="${_MY_LIBTORCH}/include/torch/csrc/api/include/:${_MY_LIBTORCH}/include/:${_MY_LIBTORCH}/include/torch:$CPATH"
+INCLUDE="${_MY_LIBTORCH}/include/torch/csrc/api/include/:${_MY_LIBTORCH}/include/:${_MY_LIBTORCH}/include/torch:$INCLUDE"
+LIBRARY_PATH="${_MY_LIBTORCH}/lib:$LIBRARY_PATH"
+LD_LIBRARY_PATH="${_MY_LIBTORCH}/lib:$LD_LIBRARY_PATH"
+
+
+echo "configuing plumed env"
+MY_PLUMED_PATH="/rwthfs/rz/cluster/home/yy508225/myplumed/plumed2.9.3"
+PATH="${MY_PLUMED_PATH}/bin:$PATH"
+PLUMED_KERNEL="${MY_PLUMED_PATH}/lib/libplumedKernel.so"
+# PYTHONPATH="${MY_PLUMED_PATH}/lib/plumed/python:$PYTHONPATH"
+PLUMED_ROOT="${MY_PLUMED_PATH}/lib/plumed/"
+LD_LIBRARY_PATH="${MY_PLUMED_PATH}/lib/:$LD_LIBRARY_PATH"
+INCLUDE="${MY_PLUMED_PATH}/include:${INCLUDE}"
+PKG_CONFIG_PATH="${MY_PLUMED_PATH}/lib/pkgconfig:${PKG_CONFIG_PATH}"
+echo "complete PLUMED env configuration"
+
+ml load CMake/3.31.7
+ml load libxc/6.2.2
+ml load HDF5/1.14.5
+
+PATH="/home/yy508225/mycp2k/cp2k-2025.1/exe/local:$PATH"
+
+# The variables below must be unset in the deactivate phase
+export CPATH
+export INCLUDE
+export LIBRARY_PATH
+
+export PATH
+export LD_LIBRARY_PATH
+
+# export PYTHONPATH
+export PLUMED_KERNEL
+export PLUMED_ROOT
+# unset PYTHONHOME if set
+# this will fail if PYTHONHOME is set to the empty string (which is bad anyway)
+# could use `if (set -u; : $PYTHONHOME) ;` in bash
+if [ -n "${PYTHONHOME:-}" ] ; then
+    _OLD_VIRTUAL_PYTHONHOME="${PYTHONHOME:-}"
+    unset PYTHONHOME
+fi
+
+if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then
+    _OLD_VIRTUAL_PS1="${PS1:-}"
+    PS1="(ONLY_PLUMED) ${PS1:-}"
+    export PS1
+    VIRTUAL_ENV_PROMPT="(ONLY_PLUMED) "
+    export VIRTUAL_ENV_PROMPT
+fi
+
+# Call hash to forget past commands. Without forgetting
+# past commands the $PATH changes we made may not be respected
+hash -r 2> /dev/null
+```
+
+## Configuration of PLUMED
+
+### 1. Load the proper modules 
 (Deprecated for OS Rocky8)
-```bash
-module load GCC/12.2.0
-module load OpenMPI/4.1.4
-module load PLUMED/2.9.0
-module unload PLUMED/2.9.0
-# Migt also try module load foss/2022b
-``` 
 
-**For OS RH9**
-```bash
- ml load foss/2024a
- ml load GSL/2.8
- ml load ncurses/6.5
- ml load bzip2/1.0.8
- ml load libreadline/8.2
- ml load Tcl/8.6.14
- ml load SQLite/3.45.3
- ml load GMP/6.3.0
- ml load libffi/3.4.5
- ml load Python/3.12.3
- ml load pybind11/2.12.0
- ml load SciPy-bundle/2024.05
- ml load gzip/1.13
- ml load lz4/1.9.4
- ml load zstd/1.5.6
- ml load ICU/75.1
- ml load Boost/1.85.0
- ml load Cython/3.0.10
- ml load CUDA/12.8.0
- ```
+  ```bash
+    module load GCC/12.2.0
+    module load OpenMPI/4.1.4
+    module load PLUMED/2.9.0
+    module unload PLUMED/2.9.0
+    # Migt also try module load foss/2022b
+  ``` 
 
-2. set up Python path (since I was using pytorch)
-    **TODO**
-    Also add here how to configure `$PYTHONPATHON` to activate my own python module
-   ```bash
+**OS RH9**
+    
+  ```bash
+    ml [--force] purge #  reset and unload all modules.
+    ml load foss/2024a
+    module load GSL/2.8
+    module load Python/3.12.3
+    ml load PLUMED/2.9.3
+    ml unload PLUMED/2.9.3
+  ```
+
+### 2. set up Python path (since I will use `libtorch` in PLUMED)
+  
+  **TODO** : Also add here how to configure `$PYTHONPATHON` to activate my own python module
+
+  ```bash
+    # the link is the only one that works for PLUMED.
+    wget https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.13.1%2Bcpu.zip 
+    unzip libtorch-cxx11-abi-shared-with-deps-1.13.1+cpu.zip
+
     LIBTORCH="/rwthfs/rz/cluster/home/yy508225/myC_lib/Libtorch/libtorch"
     export CPATH=${LIBTORCH}/include/torch/csrc/api/include/:${LIBTORCH}/include/:${LIBTORCH}/include/torch:$CPATH         
     export INCLUDE=${LIBTORCH}/include/torch/csrc/api/include/:${LIBTORCH}/include/:${LIBTORCH}/include/torch:$INCLUDE     
     export LIBRARY_PATH=${LIBTORCH}/lib:$LIBRARY_PATH
     export LD_LIBRARY_PATH=${LIBTORCH}/lib:$LD_LIBRARY_PATH
    ```
-    **Note**:
+    
+  > **Note**: Lots of external c library are set in this way.
 
-    Lots of external c library are set in this way.
-
-3. `./configure` in `plumed` folder to generate Makefile.
-    ```bash
-    ./configure --prefix=/home/yy508225/myplumed/plumed2.9.0 --enable-libtorch --enable-modules=pytorch+ves+opes CXX="$MPICXX" CPPFLAGS=-DMPICH_IGNORE_CXX_SEEK
-    ```
-    This is not sufficient. I finally activated mpi by adding one more variable `-D__PLUMED_MPI=1` to the `Makefile.conf` at the line starting with `CPPFLAGS`
-    ```bash
-     CPPFLAGS=-DMPICH_IGNORE_CXX_SEEK -DPACKAGE_NAME=\"PLUMED\" -DPACKAGE_TARNAME=\"plumed\" -DPACKAGE_VERSION=\"2\" -      DPACKAGE_STRING=\"PLUMED\ 2\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -D__PLUMED_LIBCXX11=1 -DSTDC_HEADERS=1 -     DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -     DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -D__PLUMED_HAS_EXTERNAL_BLAS=1 -                                D__PLUMED_HAS_EXTERNAL_LAPACK=1 -D__PLUMED_HAS_MOLFILE_PLUGINS=1 -D__PLUMED_HAS_MPI=1 -D__PLUMED_HAS_ASMJIT=1 -        D__PLUMED_HAS_CREGEX=1 -D__PLUMED_HAS_DLOPEN=1 -D__PLUMED_HAS_RTLD_DEFAULT=1 -D__PLUMED_HAS_CHDIR=1 -                  D__PLUMED_HAS_SUBPROCESS=1 -D__PLUMED_HAS_GETCWD=1 -D__PLUMED_HAS_POPEN=1 -D__PLUMED_HAS_EXECINFO=1 -                  D__PLUMED_HAS_ZLIB=1 -D__PLUMED_HAS_GSL=1 -D__PLUMED_HAS_FFTW=1 -D__PLUMED_HAS_PYTHON=1 -                              D__PLUMED_HAS_LIBTORCH=1 -DNDEBUG=1 -D_REENTRANT=1 
-     <add the following by the end of the last line>
-     -D__PLUMED_MPI=1
-    ```
-4. After make and install, the plumed runs with MPI as default, by checking whether MPI is available:
-   ```bash
-    plumed --has-mpi && echo ok
-   ```
-  > Update in RH9:
-  > The above command will lead to a warning regarding missing `cuda`
-   by running without MPI:
-   ```bash
-    plumed --no-mpi
-   ```
+### 3. `./configure` in `plumed` folder to generate Makefile.
   
-5. Proper setup of PLUMED env
+  Deprecated configuration step for PLUMED.
+  
+  ```bash
+  ./configure --prefix=/home/yy508225/myplumed/plumed2.9.0 --enable-libtorch --enable-modules=pytorch+ves+opes CXX="$MPICXX" CPPFLAGS=-DMPICH_IGNORE_CXX_SEEK
+  ```
+
+  **For OS RH9**
+
+  ```bash
+    # gsl should be specified. use -lopenblas instead of the default -llapack.
+    # We wanna run plumed with MPI, so we complie with MPICXX
+    ./configure --prefix=/home/yy508225/myplumed/plumed2.9.3 --enable-libtorch --enable-modules=pytorch+ves+opes CXX="$MPICXX" --enable-mpi LDFLAGS=-L/cvmfs/software.hpc.rwth.de/Linux/RH9/x86_64/intel/sapphirerapids/software/GSL/2.8-GCC-13.3.0/lib LIBS="-lopenblas -lgsl"
+  ```
+
+  This is not sufficient. I finally activated mpi by adding one more variable `-D__PLUMED_MPI=1` to the `Makefile.conf` at the line starting with `CPPFLAGS`
+  
+  ```bash
+     CPPFLAGS=-DMPICH_IGNORE_CXX_SEEK -DPACKAGE_NAME=\"PLUMED\" -DPACKAGE_TARNAME=\"plumed\" -DPACKAGE_VERSION=\"2\" -      DPACKAGE_STRING=\"PLUMED\ 2\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -D__PLUMED_LIBCXX11=1 -DSTDC_HEADERS=1 -     DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -     DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -D__PLUMED_HAS_EXTERNAL_BLAS=1 -                                D__PLUMED_HAS_EXTERNAL_LAPACK=1 -D__PLUMED_HAS_MOLFILE_PLUGINS=1 -D__PLUMED_HAS_MPI=1 -D__PLUMED_HAS_ASMJIT=1 -        D__PLUMED_HAS_CREGEX=1 -D__PLUMED_HAS_DLOPEN=1 -D__PLUMED_HAS_RTLD_DEFAULT=1 -D__PLUMED_HAS_CHDIR=1 -                  D__PLUMED_HAS_SUBPROCESS=1 -D__PLUMED_HAS_GETCWD=1 -D__PLUMED_HAS_POPEN=1 -D__PLUMED_HAS_EXECINFO=1 -                  D__PLUMED_HAS_ZLIB=1 -D__PLUMED_HAS_GSL=1 -D__PLUMED_HAS_FFTW=1 -D__PLUMED_HAS_PYTHON=1 -                              D__PLUMED_HAS_LIBTORCH=1 -DNDEBUG=1 -D_REENTRANT=1 
+     # add the following by the end of the last line
+     -D__PLUMED_MPI=1
+  ```
+
+### 4. After make and install, the plumed runs with MPI as default, by checking whether MPI is available:
+
+  ```bash
+  plumed --has-mpi && echo ok
+  ```
+
+> **Update in RH9**:
+> 
+> The above command will lead to a warning regarding missing `cuda`
+  by running without MPI:
+
+  ```bash
+  plumed --no-mpi
+  ```
+  
+### 5. Proper setup of PLUMED env
 
 ```bash
  MY_PLUMED_PATH="/rwthfs/rz/cluster/home/yy508225/myplumed/plumed2.9.0_RH9"
@@ -141,7 +327,10 @@ module unload PLUMED/2.9.0
  PLUMED_KERNEL="${MY_PLUMED_PATH}/lib/libplumedKernel.so"
  PYTHONPATH="${MY_PLUMED_PATH}/lib/plumed/python:$PYTHONPATH"
  PLUMED_ROOT="${MY_PLUMED_PATH}/lib/plumed/"
- LD_LIBRARY_PATH="${MY_PLUMED_PATH}/lib/:$LD_LIBRARY_PATH
+ LD_LIBRARY_PATH="${MY_PLUMED_PATH}/lib/:$LD_LIBRARY_PATH"
+ # The rest 2 are new setting up required by PLUMED 2.9.3
+ INCLUDE="${MY_PLUMED_PATH}/include:${INCLUDE}"
+ PKG_CONFIG_PATH="${MY_PLUMED_PATH}/lib/pkgconfig:${PKG_CONFIG_PATH}"
 ```
 
 ## Patch Gromacs with Plumed
@@ -167,70 +356,71 @@ The version of gromacs I used is `gromacs-2023`
     ```
 3. The above commands installed the `gmx_mpi`, while `gmx` can be installed at the same path by recompiling and turning off the `-DGMX_MPI` settings. 
 
-**TODO**
-how to install cp2k patched with plumed
 
 ## Install CP2K
 
 0. Additional modules for installation and simulation on new OS RH9:
-```bash
-ml load CMake/3.31.7
-ml load libxc/6.2.2
-ml load HDF5/1.14.5
-```
+    ```bash
+    ml load CMake/3.31.7
+    ml load libxc/6.2.2
+    ml load HDF5/1.14.5
+    ```
 
-1. cd /tools/toolchain
+1. `cd /tools/toolchain`
 
 
-2. ./install_cp2k_toolchain.sh
+2. `./install_cp2k_toolchain.sh`
     If want to connect to plumed, set `--with-plumed=system` with all ENV variables set correctly
 
 
-  (Deprecated for OS Rocky8)
-  ```bash 
-  ./install_cp2k_toolchain.sh --with-cmake=system --with-libxc=system --with-libint=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/Libint/2.7.2-GCC-12.2.0-lmax-6-cp2k --with-fftw=system --with-openblas=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/OpenBLAS/0.3.21-GCC-12.2.0 --with-scalapack=system --with-libxsmm=system --with-plumed=system --with-gsl=system --with-libtorch=system --with-libvori=system --with-openmpi=system --math-mode=openblas --with-intel=no --with-mpich=no --with-acml=no --with-mkl=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/imkl/2022.1.0/mkl/2022.1.0 --with-intelmpi=no --mpi-mode=openmpi
-  ```
+    (Deprecated for OS Rocky8)
+    ```bash 
+      ./install_cp2k_toolchain.sh --with-cmake=system --with-libxc=system --with-libint=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/Libint/2.7.2-GCC-12.2.0-lmax-6-cp2k --with-fftw=system --with-openblas=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/OpenBLAS/0.3.21-GCC-12.2.0 --with-scalapack=system --with-libxsmm=system --with-plumed=system --with-gsl=system --with-libtorch=system --with-libvori=system --with-openmpi=system --math-mode=openblas --with-intel=no --with-mpich=no --with-acml=no --with-mkl=/cvmfs/software.hpc.rwth.de/Linux/RH8/x86_64/intel/skylake_avx512/software/imkl/2022.1.0/mkl/2022.1.0 --with-intelmpi=no --mpi-mode=openmpi
+    ```
 
-  **For OS RH9**
+    **For OS RH9**
 
-  ```bash 
-./install_cp2k_toolchain.sh --with-cmake=system --with-libxc=system --with-fftw=system --with-openblas=/cvmfs/software.hpc.rwth.de/Linux/RH9/x86_64/intel/sapphirerapids/software/OpenBLAS/0.3.27-GCC-13.3.0/ --with-scalapack=system --with-plumed=system --with-gsl=system --with-libtorch=system --with-openmpi=system --math-mode=openblas --with-intel=no --with-mpich=no --with-acml=no --with-mkl=no --with-intelmpi=no --mpi-mode=openmpi
-  
-  # Purely independent installation
-  ./install_cp2k_toolchain.sh --with-gcc=install --with-intel=no --with-openmpi=install --with-mpich=no --with-intelmpi=no --with-acml=no --with-mkl=no --with-plumed=install --with-libtorch=install
-  ```
+    ```bash 
+      # The final successful installation toolchain
+      # openblas and gsl like in PLUMED must declare clearly
+      ./install_cp2k_toolchain.sh --with-cmake=system --with-libxc=system --with-fftw=system --with-openblas=/cvmfs/software.hpc.rwth.de/Linux/RH9/x86_64/intel/sapphirerapids/software/OpenBLAS/0.3.27-GCC-13.3.0 --with-scalapack=system --with-plumed=system --with-gsl=/cvmfs/software.hpc.rwth.de/Linux/RH9/x86_64/intel/sapphirerapids/software/GSL/2.8-GCC-13.3.0 --with-libtorch=system --with-openmpi=system --math-mode=openblas --with-intel=no --with-mpich=no --with-acml=no --with-mkl=no --with-intelmpi=no --mpi-mode=openmpi 
+
+      # Purely independent installation
+      ./install_cp2k_toolchain.sh --with-gcc=install --with-intel=no --with-openmpi=install --with-mpich=no --with-intelmpi=no --with-acml=no --with-mkl=no --with-plumed=install --with-libtorch=install
+    ```
 
 3. Follow the hints raised after successful configuration, copying the create arch files like 'local.ssmp' to arch folder in cp2k path, i.e. `~/mycp2k/cp2k-2025.1`
    
-```bash
-Now copy:
-  cp /home/yy508225/mycp2k/cp2k-2025.1/tools/toolchain/install/arch/* to the cp2k/arch/ directory
-To use the installed tools and libraries and cp2k version
-compiled with it you will first need to execute at the prompt:
-  source /home/yy508225/mycp2k/cp2k-2025.1/tools/toolchain/install/setup
-To build CP2K you should change directory:
-  cd cp2k/
-  make -j 96 ARCH=local VERSION="ssmp sdbg psmp pdbg"
-```
+    ```bash
+    Now copy:
+    cp /home/yy508225/mycp2k/cp2k-2025.1/tools/toolchain/install/arch/* to the cp2k/arch/ directory
+    To use the installed tools and libraries and cp2k version
+    compiled with it you will first need to execute at the prompt:
+    source /home/yy508225/mycp2k/cp2k-2025.1/tools/toolchain/install/setup
+    To build CP2K you should change directory:
+    cd cp2k/
+    make -j 96 ARCH=local VERSION="ssmp sdbg psmp pdbg"
+    ```
 
 4. source the setup file in the 'toolchain' folder
-```bash
-source /home/yy508225/mycp2k/cp2k-2023.1/tools/toolchain/install/setup
-```
+    ```bash
+    source /home/yy508225/mycp2k/cp2k-2023.1/tools/toolchain/install/setup
+    ```
 
 5. make 
-```bash
-# in ~/mycp2k/cp2k-2025.1
-make -j 96 ARCH=local VERSION=psmp
-```
+    ```bash
+    # in ~/mycp2k/cp2k-2025.1
+    make -j 96 ARCH=local VERSION=psmp
+    ```
 
 6. Setup `$PATH` for CP2K
 
-```bash
-PATH="/home/yy508225/mycp2k/cp2k-2025.1/exe/local:$PATH"
-```
+    ```bash
+    PATH="/home/yy508225/mycp2k/cp2k-2025.1/exe/local:$PATH"
+    ```
 
-## Install Lammps
+# Install Lammps
+## Install Lammps with CMake
 We can follow the settings in the `cmake/presets` folder. Not to build shared library.
 
 `-D` means define certain variable in cmake
@@ -241,6 +431,11 @@ cmake -C ../cmake/presets/custom.cmake -C ../cmake/presets/gcc.cmake -DCMAKE_INS
 make
 make install
 ```
+
+## Install Lammps with Make
+Here we take the example of special inhouse Lammps version: CTYTAD + DFTBP
+
+**TODO**
 
 ## Patch lammps with plumed
 
