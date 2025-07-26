@@ -85,6 +85,145 @@ The above must be the commands I used for install `mlcolvar` and `plumed` python
 
 ## Configuration of Python Virtual VENV
 
+### 1. `activate` part
+
+- The following are default setting up for Python 3.12 ven, do not change.
+```bash  
+# on Windows, a path can contain colons and backslashes and has to be converted:
+if [ "${OSTYPE:-}" = "cygwin" ] || [ "${OSTYPE:-}" = "msys" ] ; then
+    # transform D:\path\to\venv to /d/path/to/venv on MSYS
+    # and to /cygdrive/d/path/to/venv on Cygwin
+    export VIRTUAL_ENV=$(cygpath "/rwthfs/rz/cluster/home/yy508225/RH9PYENV/ONLY_PLUMED")
+else
+    # use the path as-is
+    export VIRTUAL_ENV="/rwthfs/rz/cluster/home/yy508225/RH9PYENV/ONLY_PLUMED"
+fi
+
+```
+
+- Store the old parameters for recovery during `deactivate`.
+
+```bash
+# $INCLUDE is not backed-up because it is not set in default env
+_OLD_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+_OLD_CPATH="$CPATH"
+_OLD_LIBRARY_PATH="$LIBRARY_PATH"
+
+_OLD_VIRTUAL_PATH="$PATH" # default
+
+```
+
+- Load required modules for proper `env`
+
+```bash
+# module purge for unload all unnecessary modules
+# In some case for sticky modules, `ml --force purge` is necessary.
+module purge
+module load foss/2024a
+module load GSL/2.8
+module load Python/3.12.3
+ml load PLUMED/2.9.3
+ml unload PLUMED/2.9.3
+
+# LD_LIBRARY_PATH="/cvmfs/software.hpc.rwth.de/Linux/RH9/x86_64/intel/sapphirerapids/software/CUDA/12.8.0/targets/x86_64-linux/lib/stubs:$LD_LIBRARY_PATH"
+
+PATH="$VIRTUAL_ENV/bin:$PATH" #default
+```
+
+- Configuring `libtorch`.
+  - `$CPATH` : Paths of header files for `gcc` searching during compilation.
+  - `$INCLUDE` : Paths of header files for other compilers searching during compilation.
+  - `$LD_LIBRARY_PATH` :
+    - is used to specify a list of directories where the system's dynamic linker should look for shared libraries before searching the default library paths.
+    - This variable is particularly useful when you have libraries that are not installed in standard locations, and you want to ensure that they are found during program execution.
+    - When you compile and link your program, you need to tell the linker where to find these shared libraries using options like `-L/path` (to specify library search paths) and `-l<lib_name>` (to specify which libraries to link).
+  - `$LIBRARY_PATH` :
+    - The `$LIBRARY_PATH` environment variable is used during the linking phase of compilation.
+    - It specifies directories where the linker should look for library files (.a, .so) when creating an executable or another library.
+    - This variable helps the linker find libraries needed to resolve symbols referenced in your code during the build process.
+    - If you have libraries stored in non-standard locations, setting `$LIBRARY_PATH` ensures that the linker can locate them without needing additional `-L` flags
+
+```bash
+echo "adding libtorch to cpath"
+_MY_LIBTORCH="/rwthfs/rz/cluster/home/yy508225/myC_lib/Libtorch/libtorch"
+CPATH="${_MY_LIBTORCH}/include/torch/csrc/api/include/:${_MY_LIBTORCH}/include/:${_MY_LIBTORCH}/include/torch:$CPATH"
+INCLUDE="${_MY_LIBTORCH}/include/torch/csrc/api/include/:${_MY_LIBTORCH}/include/:${_MY_LIBTORCH}/include/torch:$INCLUDE"
+LIBRARY_PATH="${_MY_LIBTORCH}/lib:$LIBRARY_PATH"
+LD_LIBRARY_PATH="${_MY_LIBTORCH}/lib:$LD_LIBRARY_PATH"
+```
+
+- Configure plumed
+
+```bash
+echo "configuing plumed env"
+MY_PLUMED_PATH="/rwthfs/rz/cluster/home/yy508225/myplumed/plumed2.9.3"
+PATH="${MY_PLUMED_PATH}/bin:$PATH"
+PLUMED_KERNEL="${MY_PLUMED_PATH}/lib/libplumedKernel.so"
+# PYTHONPATH="${MY_PLUMED_PATH}/lib/plumed/python:$PYTHONPATH"
+PLUMED_ROOT="${MY_PLUMED_PATH}/lib/plumed/"
+LD_LIBRARY_PATH="${MY_PLUMED_PATH}/lib/:$LD_LIBRARY_PATH"
+INCLUDE="${MY_PLUMED_PATH}/include:${INCLUDE}"
+PKG_CONFIG_PATH="${MY_PLUMED_PATH}/lib/pkgconfig:${PKG_CONFIG_PATH}"
+echo "complete PLUMED env configuration"
+
+```
+
+- Load additional modules for CP2K and set `$PATH` for CP2K
+
+```bash
+ml load CMake/3.31.7
+ml load libxc/6.2.2
+ml load HDF5/1.14.5
+
+PATH="/home/yy508225/mycp2k/cp2k-2025.1/exe/local:$PATH"
+
+```
+
+- Export all modified env variables
+
+```bash
+
+# The variables below must be unset in the deactivate phase
+export CPATH
+export INCLUDE
+export LIBRARY_PATH
+
+export PATH
+export LD_LIBRARY_PATH
+
+# export PYTHONPATH
+export PLUMED_KERNEL
+export PLUMED_ROOT
+
+# The following is default.
+
+# unset PYTHONHOME if set
+# this will fail if PYTHONHOME is set to the empty string (which is bad anyway)
+# could use `if (set -u; : $PYTHONHOME) ;` in bash
+if [ -n "${PYTHONHOME:-}" ] ; then
+    _OLD_VIRTUAL_PYTHONHOME="${PYTHONHOME:-}"
+    unset PYTHONHOME
+fi
+
+if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then
+    _OLD_VIRTUAL_PS1="${PS1:-}"
+    PS1="(ONLY_PLUMED) ${PS1:-}"
+    export PS1
+    VIRTUAL_ENV_PROMPT="(ONLY_PLUMED) "
+    export VIRTUAL_ENV_PROMPT
+fi
+
+# Call hash to forget past commands. Without forgetting
+# past commands the $PATH changes we made may not be respected
+hash -r 2> /dev/null
+```
+
+### 2. `deactivate` part.
+
+- Recover all old variables.
+- Unset newly added variables.
+- load default modules.
+
 ```shell
 # This file must be used with "source bin/activate" *from bash*
 # You cannot run it directly
@@ -150,92 +289,6 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-```
-
-```bash  
-# on Windows, a path can contain colons and backslashes and has to be converted:
-if [ "${OSTYPE:-}" = "cygwin" ] || [ "${OSTYPE:-}" = "msys" ] ; then
-    # transform D:\path\to\venv to /d/path/to/venv on MSYS
-    # and to /cygdrive/d/path/to/venv on Cygwin
-    export VIRTUAL_ENV=$(cygpath "/rwthfs/rz/cluster/home/yy508225/RH9PYENV/ONLY_PLUMED")
-else
-    # use the path as-is
-    export VIRTUAL_ENV="/rwthfs/rz/cluster/home/yy508225/RH9PYENV/ONLY_PLUMED"
-fi
-_OLD_VIRTUAL_PATH="$PATH"
-_OLD_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
-_OLD_CPATH="$CPATH"
-_OLD_LIBRARY_PATH="$LIBRARY_PATH"
-
-
-
-_OLD_VIRTUAL_PATH="$PATH"
-module purge
-module load foss/2024a
-module load GSL/2.8
-module load Python/3.12.3
-ml load PLUMED/2.9.3
-ml unload PLUMED/2.9.3
-
-# LD_LIBRARY_PATH="/cvmfs/software.hpc.rwth.de/Linux/RH9/x86_64/intel/sapphirerapids/software/CUDA/12.8.0/targets/x86_64-linux/lib/stubs:$LD_LIBRARY_PATH"
-
-PATH="$VIRTUAL_ENV/bin:$PATH"
-
-echo "adding libtorch to cpath"
-_MY_LIBTORCH="/rwthfs/rz/cluster/home/yy508225/myC_lib/Libtorch/libtorch"
-CPATH="${_MY_LIBTORCH}/include/torch/csrc/api/include/:${_MY_LIBTORCH}/include/:${_MY_LIBTORCH}/include/torch:$CPATH"
-INCLUDE="${_MY_LIBTORCH}/include/torch/csrc/api/include/:${_MY_LIBTORCH}/include/:${_MY_LIBTORCH}/include/torch:$INCLUDE"
-LIBRARY_PATH="${_MY_LIBTORCH}/lib:$LIBRARY_PATH"
-LD_LIBRARY_PATH="${_MY_LIBTORCH}/lib:$LD_LIBRARY_PATH"
-
-
-echo "configuing plumed env"
-MY_PLUMED_PATH="/rwthfs/rz/cluster/home/yy508225/myplumed/plumed2.9.3"
-PATH="${MY_PLUMED_PATH}/bin:$PATH"
-PLUMED_KERNEL="${MY_PLUMED_PATH}/lib/libplumedKernel.so"
-# PYTHONPATH="${MY_PLUMED_PATH}/lib/plumed/python:$PYTHONPATH"
-PLUMED_ROOT="${MY_PLUMED_PATH}/lib/plumed/"
-LD_LIBRARY_PATH="${MY_PLUMED_PATH}/lib/:$LD_LIBRARY_PATH"
-INCLUDE="${MY_PLUMED_PATH}/include:${INCLUDE}"
-PKG_CONFIG_PATH="${MY_PLUMED_PATH}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-echo "complete PLUMED env configuration"
-
-ml load CMake/3.31.7
-ml load libxc/6.2.2
-ml load HDF5/1.14.5
-
-PATH="/home/yy508225/mycp2k/cp2k-2025.1/exe/local:$PATH"
-
-# The variables below must be unset in the deactivate phase
-export CPATH
-export INCLUDE
-export LIBRARY_PATH
-
-export PATH
-export LD_LIBRARY_PATH
-
-# export PYTHONPATH
-export PLUMED_KERNEL
-export PLUMED_ROOT
-# unset PYTHONHOME if set
-# this will fail if PYTHONHOME is set to the empty string (which is bad anyway)
-# could use `if (set -u; : $PYTHONHOME) ;` in bash
-if [ -n "${PYTHONHOME:-}" ] ; then
-    _OLD_VIRTUAL_PYTHONHOME="${PYTHONHOME:-}"
-    unset PYTHONHOME
-fi
-
-if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then
-    _OLD_VIRTUAL_PS1="${PS1:-}"
-    PS1="(ONLY_PLUMED) ${PS1:-}"
-    export PS1
-    VIRTUAL_ENV_PROMPT="(ONLY_PLUMED) "
-    export VIRTUAL_ENV_PROMPT
-fi
-
-# Call hash to forget past commands. Without forgetting
-# past commands the $PATH changes we made may not be respected
-hash -r 2> /dev/null
 ```
 
 ## Configuration of PLUMED
