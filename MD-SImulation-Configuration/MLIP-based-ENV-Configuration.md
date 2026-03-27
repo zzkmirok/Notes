@@ -186,7 +186,7 @@ This time I check the `PLUMED` dir in the module system, and figured out how the
 
     ```
 
-    Suppose the name of the file above is envsetting.cmake in `cmake/presets`
+    Suppose the name of the file above is `envsetting.cmake` in `cmake/presets`
 
    3. in the `lammps-mace` dir, in the newly created `build` folder:
 
