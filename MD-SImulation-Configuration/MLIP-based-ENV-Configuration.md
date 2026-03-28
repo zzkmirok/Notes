@@ -91,7 +91,7 @@ This time I check the `PLUMED` dir in the module system, and figured out how the
 
 ### Install `LAMMPS` with `MACE` and `metatomic`
 
-1. Intall `lammps-mace`
+1. Install `lammps-mace`
 
     check the [lammps-mace-docu](https://mace-docs.readthedocs.io/en/latest/guide/lammps.html)
 
@@ -101,9 +101,9 @@ This time I check the `PLUMED` dir in the module system, and figured out how the
 
     1. Clone the repo.
 
-    ```shell
-    git clone --branch=mace --depth=1 https://github.com/ACEsuit/lammps
-    ```
+        ```shell
+        git clone --branch=mace --depth=1 https://github.com/ACEsuit/lammps
+        ```
    
    2. Create a `.cmake` file for configuring the compilation related env. Put it in the `cmake/preset`
 
@@ -239,10 +239,10 @@ This time I check the `PLUMED` dir in the module system, and figured out how the
 
         With `srun`:
         ```
-        srun [--ntasks=1] [--cpus-per-task=]<n_cpus_per_lammps_task> lmp -k on g 1 [t] <n_cpus_per_lammps_task> -in in_unbiased.lammps
-        srun --ntasks=1 --cpus-per-task=24 lmp -k on g 1 t 24 -in in_unbiased.lammps
+        srun [--ntasks=1] [--cpus-per-task=]<n_cpus_per_lammps_task> lmp -k on g 1 [t] <n_cpus_per_lammps_task> -in in_unbiased.lammps -sf kk
+        srun --ntasks=1 --cpus-per-task=24 lmp -k on g 1 t 24 -in in_unbiased.lammps -sf kk
         # is equivalent to
-        srun lmp -k on g 1 t 24 -in in_unbiased.lammps
+        srun lmp -k on g 1 t 24 -in in_unbiased.lammps -sf kk
         ```
         This means using 1 gpu and `n_cpus_per_lammps_task` cpus on 1 `LAMMPS` simulation. The `n_cpus_per_lammps_task` must <= 24. (24 cpus for 1 H100 gpu node)
 
