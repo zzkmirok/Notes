@@ -52,27 +52,27 @@ export CMAKE_PREFIX_PATH="$TORCH_PREFIX;$CMAKE_PREFIX_PATH"
 
 Before installation, still do not forget to configure the `PLUMED` related ENV var.
 
-```shell
-_MY_LIBTORCH=$(python -c "import torch, os; print(os.path.dirname(torch.__file__))")
-CPATH="${_MY_LIBTORCH}/include/torch/csrc/api/include/:${_MY_LIBTORCH}/include/:${_MY_LIBTORCH}/include/torch:$CPATH"
-INCLUDE="${_MY_LIBTORCH}/include/torch/csrc/api/include/:${_MY_LIBTORCH}/include/:${_MY_LIBTORCH}/include/torch:$INCLUDE"
-LIBRARY_PATH="${_MY_LIBTORCH}/lib:$LIBRARY_PATH"
-LD_LIBRARY_PATH="${_MY_LIBTORCH}/lib:$LD_LIBRARY_PATH"
-```
+    ```shell
+    _MY_LIBTORCH=$(python -c "import torch, os; print(os.path.dirname(torch.__file__))")
+    CPATH="${_MY_LIBTORCH}/include/torch/csrc/api/include/:${_MY_LIBTORCH}/include/:${_MY_LIBTORCH}/include/torch:$CPATH"
+    INCLUDE="${_MY_LIBTORCH}/include/torch/csrc/api/include/:${_MY_LIBTORCH}/include/:${_MY_LIBTORCH}/include/torch:$INCLUDE"
+    LIBRARY_PATH="${_MY_LIBTORCH}/lib:$LIBRARY_PATH"
+    LD_LIBRARY_PATH="${_MY_LIBTORCH}/lib:$LD_LIBRARY_PATH"
+    ```
 
 This time I check the `PLUMED` dir in the module system, and figured out how the default `PLUMED` is configured.
 
-```shell
-./configure --prefix=$WORK/myplumed/plumed2.10.0-custom \\n    
-            --enable-mpi \\n    
-            --enable-libtorch \\n    
-            --enable-modules=all \\n    
-            CXX="mpicxx" \\n    
-            CXXFLAGS="-O2 -ftree-vectorize -march=sapphirerapids -fno-math-errno -fPIC -std=c++17 -fopenmp" \\n    
-            CPPFLAGS="-I${_MY_LIBTORCH}/include -I${_MY_LIBTORCH}/include/torch/csrc/api/include/ -I${_MY_LIBTORCH}/include/torch" \\n    
-            LDFLAGS="-Wl,-rpath,${_MY_LIBTORCH}/lib" \\n    
-            LIBS="-ltorch -ltorch_cpu -ltorch_cuda -lc10 -lc10_cuda -lflexiblas -lgsl -lfftw3 -lboost_serialization"
-```
+    ```shell
+    ./configure --prefix=$WORK/myplumed/plumed2.10.0-custom \\n    
+                --enable-mpi \\n    
+                --enable-libtorch \\n    
+                --enable-modules=all \\n    
+                CXX="mpicxx" \\n    
+                CXXFLAGS="-O2 -ftree-vectorize -march=sapphirerapids -fno-math-errno -fPIC -std=c++17 -fopenmp" \\n    
+                CPPFLAGS="-I${_MY_LIBTORCH}/include -I${_MY_LIBTORCH}/include/torch/csrc/api/include/ -I${_MY_LIBTORCH}/include/torch" \\n    
+                LDFLAGS="-Wl,-rpath,${_MY_LIBTORCH}/lib" \\n    
+                LIBS="-ltorch -ltorch_cpu -ltorch_cuda -lc10 -lc10_cuda -lflexiblas -lgsl -lfftw3 -lboost_serialization"
+    ```
 
 > **Remark**
 
