@@ -178,6 +178,7 @@ This time I check the `PLUMED` dir in the module system, and figured out how the
         set(PKG_REAXFF ON CACHE BOOL "" FORCE)
         set(PKG_PYTHON ON CACHE BOOL "" FORCE)
         set(PKG_VORONOI ON CACHE BOOL "" FORCE)
+        set(PKG_EXTRA-PAIR ON CACHE BOOL "" FORCE) # This is required for adding dispersion in lammps.
 
         # 压缩与 I/O 支持
         # Support for gzip and input output like PNG and JPEG (seems not necessary)
@@ -189,7 +190,7 @@ This time I check the `PLUMED` dir in the module system, and figured out how the
 
         Suppose the name of the file above is `envsetting.cmake` in `cmake/presets`
 
-   3. in the `lammps-mace` dir, in the newly created `build` folder, run `cmake`:
+   3. in the `lammps-mace` dir, in the newly created `build` folder, run `cmake` (suppose the script above is saved as `./cmake/presets/customzzk.cmake` in `LAMMPS` source folder):
 
         ```shell
         cmake -C ../cmake/presets/customzzk.cmake ../cmake -DCMAKE_INSTALL_PREFIX=/home/rwth1997/lammps-custom-mace       
@@ -348,10 +349,11 @@ This time I check the `PLUMED` dir in the module system, and figured out how the
         #SBATCH --cpus-per-task=1
 
         ```
-    - `--cpus-per-tasks` must correspond to the `LAMMPS` task value, i.e. The value after `t`. There are also additional commands for running packed jobs simuteneously.
+    - `--cpus-per-tasks` must correspond to the `LAMMPS` task value, i.e. The value after `t`. 
 
         ```shell
-        export OMP_PLACES="threads"
-        export OMP_PROC_BIND="spread"
+        # The following 2 settings are suggested by `LAMMPS-KKOKOS`,But I find them in fact make the computation slower. 
+        # export OMP_PLACES="threads"
+        # export OMP_PROC_BIND="spread"
         srun --exact --ntasks=1 --cpus-per-task=1 --overlap lmp -k on g 1 t 1 -in in_unbiased.lammps -sf kk
         ```
