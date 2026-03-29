@@ -170,7 +170,7 @@ This time I check the `PLUMED` dir in the module system, and figured out how the
         set(CMAKE_BUILD_WITH_INSTALL_RPATH ON CACHE BOOL "" FORCE)
 
         # --- 5. 常用物理包补齐 (参考系统版) ---
-        # --- 5. basic lammps package for this lammps-mace version ---
+        # --- 5. basic lammps packages for this lammps-mace version ---
         set(PKG_MANYBODY ON CACHE BOOL "" FORCE)
         set(PKG_KSPACE ON CACHE BOOL "" FORCE)
         set(PKG_MOLECULE ON CACHE BOOL "" FORCE)
@@ -190,7 +190,7 @@ This time I check the `PLUMED` dir in the module system, and figured out how the
 
         Suppose the name of the file above is `envsetting.cmake` in `cmake/presets`
 
-   3. in the `lammps-mace` dir, in the newly created `build` folder, run `cmake` (suppose the script above is saved as `./cmake/presets/customzzk.cmake` in `LAMMPS` source folder):
+   3. in the `LAMMPS` source folder, we created a `build` folder. Run `cmake` there with the following command. (suppose the script above is saved as `./cmake/presets/customzzk.cmake` in `LAMMPS` source folder):
 
         ```shell
         cmake -C ../cmake/presets/customzzk.cmake ../cmake -DCMAKE_INSTALL_PREFIX=/home/rwth1997/lammps-custom-mace       
